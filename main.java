@@ -1,100 +1,171 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão Financeira n8n</title>
+    <title>Painel Financeiro n8n</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --primary: #4f46e5;
-            --success: #22c55e;
-            --danger: #ef4444;
-            --bg: #f8fafc;
+        body {
+            background-color: #f1f5f9;
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; padding: 2rem; border-radius: 12px; shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; border: 1px solid #e2e8f0; }
-        h2 { color: #1e293b; text-align: center; margin-bottom: 1.5rem; }
-        .group { margin-bottom: 1rem; }
-        label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; color: #64748b; }
-        input { width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 0.8rem; margin-top: 1rem; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; transition: opacity 0.2s; }
-        .btn-save { background: var(--success); }
-        .btn-del { background: var(--danger); }
-        .btn-report { background: var(--primary); }
-        button:hover { opacity: 0.9; }
-        #output { margin-top: 1.5rem; padding: 1rem; border-radius: 6px; background: #f1f5f9; font-size: 0.9rem; color: #334155; display: none; white-space: pre-wrap; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
-<body>
+<body class="min-h-screen flex items-center justify-center p-4">
 
-<div class="card">
-    <h2>💰 Meu Financeiro</h2>
-    
-    <div class="group">
-        <label>Data</label>
-        <input type="text" id="dia" placeholder="dd/mm/aaaa">
+    <div class="max-w-md w-full glass-card p-8 rounded-3xl shadow-2xl">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-wallet text-blue-600"></i>
+                Gestão n8n
+            </h1>
+            <p class="text-gray-500 mt-2">Controle de Ganhos e Gastos</p>
+        </div>
+
+        <!-- Formulário -->
+        <div class="space-y-5">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Data</label>
+                <input type="text" id="dia" 
+                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    placeholder="dd/mm/aaaa">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1 text-green-600">Ganhos (R$)</label>
+                    <input type="number" id="ganhos" 
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-500 outline-none"
+                        placeholder="0.00">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1 text-red-600">Gastos (R$)</label>
+                    <input type="number" id="gastos" 
+                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-red-500 outline-none"
+                        placeholder="0.00">
+                </div>
+            </div>
+
+            <!-- Botões Principais -->
+            <button onclick="enviar('finacas', true)" 
+                id="btn-save"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transform active:scale-95 transition-all flex items-center justify-center gap-2">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Salvar / Atualizar
+            </button>
+
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="enviar('excluir', false)" 
+                    class="bg-white border-2 border-red-100 hover:border-red-500 text-red-500 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-trash"></i> Eliminar
+                </button>
+                
+                <button onclick="getRelatorio()" 
+                    class="bg-gray-800 hover:bg-black text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-md">
+                    <i class="fa-solid fa-chart-line"></i> Relatório
+                </button>
+            </div>
+        </div>
+
+        <!-- Area de Resposta -->
+        <div id="status-container" class="mt-8 hidden">
+            <div id="status-box" class="p-4 rounded-xl text-sm font-medium flex items-center gap-3">
+                <!-- Conteúdo inserido via JS -->
+            </div>
+        </div>
     </div>
-    
-    <div class="group">
-        <label>Ganhos (R$)</label>
-        <input type="number" id="ganhos" placeholder="0.00">
-    </div>
-    
-    <div class="group">
-        <label>Gastos (R$)</label>
-        <input type="number" id="gastos" placeholder="0.00">
-    </div>
 
-    <button class="btn-save" onclick="enviar('finacas', true)">Salvar / Atualizar</button>
-    <button class="btn-del" onclick="enviar('excluir', false)">Excluir Dia</button>
-    <button class="btn-report" onclick="getRelatorio()">Ver Saldo Total</button>
+    <script>
+        // Define a data atual automaticamente no formato da planilha
+        document.addEventListener('DOMContentLoaded', () => {
+            const hoje = new Date();
+            const dia = String(hoje.getDate()).padStart(2, '0');
+            const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+            const ano = hoje.getFullYear();
+            document.getElementById('dia').value = `${dia}/${mes}/${ano}`;
+        });
 
-    <div id="output"></div>
-</div>
+        const showStatus = (message, type) => {
+            const container = document.getElementById('status-container');
+            const box = document.getElementById('status-box');
+            
+            container.classList.remove('hidden');
+            
+            if (type === 'loading') {
+                box.className = 'p-4 rounded-xl text-sm font-medium flex items-center gap-3 bg-blue-50 text-blue-700 border border-blue-100';
+                box.innerHTML = '<div class="loading-spinner"></div> <span>A processar pedido...</span>';
+            } else if (type === 'success') {
+                box.className = 'p-4 rounded-xl text-sm font-medium flex items-center gap-3 bg-green-50 text-green-700 border border-green-100';
+                box.innerHTML = '<i class="fa-solid fa-circle-check text-lg"></i> <span>' + message + '</span>';
+            } else {
+                box.className = 'p-4 rounded-xl text-sm font-medium flex items-center gap-3 bg-red-50 text-red-700 border border-red-100';
+                box.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-lg"></i> <span>' + message + '</span>';
+            }
+        };
 
-<script>
-    // Preencher data atual automaticamente
-    document.getElementById('dia').value = new Date().toLocaleDateString('pt-BR');
+        async function enviar(path, fullData) {
+            const dia = document.getElementById('dia').value;
+            const ganhos = document.getElementById('ganhos').value;
+            const gastos = document.getElementById('gastos').value;
 
-    async function enviar(path, fullData) {
-        const out = document.getElementById('output');
-        const body = { dia: document.getElementById('dia').value };
-        
-        if(fullData) {
-            body.ganhos = document.getElementById('ganhos').value;
-            body.gastos = document.getElementById('gastos').value;
+            if (!dia) return showStatus("Por favor, insira uma data.", "error");
+
+            showStatus("", "loading");
+
+            const payload = { dia };
+            if (fullData) {
+                payload.ganhos = ganhos || 0;
+                payload.gastos = gastos || 0;
+            }
+
+            try {
+                const response = await fetch(`https://n8n.commitjr.com/webhook/${path}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.text();
+                showStatus(result || "Operação concluída!", "success");
+                
+                // Limpar campos de valores após salvar
+                if (fullData) {
+                    document.getElementById('ganhos').value = '';
+                    document.getElementById('gastos').value = '';
+                }
+            } catch (error) {
+                showStatus("Erro na ligação: " + error.message, "error");
+            }
         }
 
-        out.style.display = 'block';
-        out.innerText = "Processando...";
+        async function getRelatorio() {
+            showStatus("", "loading");
 
-        try {
-            const response = await fetch(`https://n8n.commitjr.com/webhook/${path}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
-            const resText = await response.text();
-            out.innerText = "Resposta: " + resText;
-        } catch (err) {
-            out.innerText = "Erro ao conectar: " + err.message;
+            try {
+                const response = await fetch(`https://n8n.commitjr.com/webhook/relatorio`);
+                const result = await response.text();
+                showStatus(result, "success");
+            } catch (error) {
+                showStatus("Erro ao obter relatório: " + error.message, "error");
+            }
         }
-    }
-
-    async function getRelatorio() {
-        const out = document.getElementById('output');
-        out.style.display = 'block';
-        out.innerText = "Buscando saldo...";
-
-        try {
-            const response = await fetch(`https://n8n.commitjr.com/webhook/relatorio`);
-            const resText = await response.text();
-            out.innerText = "Relatório:\n" + resText;
-        } catch (err) {
-            out.innerText = "Erro ao buscar: " + err.message;
-        }
-    }
-</script>
-
+    </script>
 </body>
 </html>
